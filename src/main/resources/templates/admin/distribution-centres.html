@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Distribution Centres</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container mt-4">
+        <h2>Distribution Centres</h2>
+
+        <div th:if="${message}" class="alert alert-success" role="alert">
+            <span th:text="${message}">Success message</span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <span th:text="${error}">Error message</span>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Search for Items</h4>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/search-centres}" th:object="${searchForm}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="name" class="form-label">Item Name</label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="brand" class="form-label">Brand</label>
+                            <select class="form-select" id="brand" th:field="*{brand}" required>
+                                <option value="">Select Brand</option>
+                                <option th:each="brand : ${T(com.cpan228.warehouse.model.Item.Brand).values()}"
+                                        th:value="${brand.name()}"
+                                        th:text="${brand.displayName}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Search Centres</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div th:if="${searchResults != null}" class="card mb-4">
+            <div class="card-header">
+                <h4>Search Results</h4>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(searchResults)}" class="alert alert-info">
+                    No distribution centres found with the specified item.
+                </div>
+                <div th:if="${not #lists.isEmpty(searchResults)}" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Centre Name</th>
+                                <th>Address</th>
+                                <th>Distance</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="centre, stat : ${searchResults}">
+                                <td th:text="${centre.name}">Centre Name</td>
+                                <td th:text="${centre.address}">Address</td>
+                                <td>
+                                    <span th:if="${stat.first}" class="badge bg-success">Nearest</span>
+                                    <span th:unless="${stat.first}">Further</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/request-item}" method="post" class="d-inline">
+                                        <input type="hidden" name="centreId" th:value="${centre.id}" />
+                                        <input type="hidden" name="name" th:value="${searchForm.name}" />
+                                        <input type="hidden" name="brand" th:value="${searchForm.brand.name()}" />
+                                        <div class="input-group" style="max-width: 200px;">
+                                            <input type="number" name="quantity" value="1" min="1" 
+                                                   class="form-control form-control-sm" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Request</button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribution Centres and Local Inventory Section -->
+        <div class="row">
+            <!-- Available Distribution Centres -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Available Distribution Centres</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div th:each="centre : ${distributionCentres}" class="list-group-item">
+                                <h5 th:text="${centre.name}">Centre Name</h5>
+                                <p class="mb-1" th:text="${centre.address}">Address</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Local Inventory -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Local Inventory</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Brand</th>
+                                        <th>Year</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${items}">
+                                        <td th:text="${item.name}">Item Name</td>
+                                        <td th:text="${item.brand.displayName}">Brand</td>
+                                        <td th:text="${item.yearOfCreation}">Year</td>
+                                        <td th:text="${item.quantity}">Quantity</td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(item.price, 1, 2)}">Price</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

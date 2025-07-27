@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add New Item</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container mt-4">
+        <h2>Add New Item</h2>
+
+        <form th:action="@{/inventory/add}" th:object="${item}" method="post" class="mt-4">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="brand" class="form-label">Brand</label>
+                <select class="form-select" id="brand" th:field="*{brand}" required>
+                    <option value="">Select Brand</option>
+                    <option th:each="brandOption : ${T(com.cpan228.warehouse.model.Item.Brand).values()}"
+                            th:value="${brandOption.name()}"
+                            th:text="${brandOption.displayName}">
+                    </option>
+                </select>
+                <div class="text-danger" th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="yearOfCreation" class="form-label">Year of Creation</label>
+                <input type="number" class="form-control" id="yearOfCreation" th:field="*{yearOfCreation}" min="2022" required>
+                <div class="text-danger" th:if="${#fields.hasErrors('yearOfCreation')}" th:errors="*{yearOfCreation}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input type="number" step="0.01" class="form-control" id="price" th:field="*{price}" min="1000.01" required>
+                <div class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Item</button>
+            <a th:href="@{/inventory}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
